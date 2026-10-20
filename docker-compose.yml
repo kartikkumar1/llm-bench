@@ -1,0 +1,35 @@
+# docker compose up --build        -> CPU llama-server + gateway/dashboard + Prometheus
+# NVIDIA GPU:  docker compose -f docker-compose.yml -f docker-compose.cuda.yml up --build
+# MODEL_FILE / LLAMA_THREADS / CTX / LLAMA_MEM_LIMIT override the defaults (see .env.example).
+#
+# Docker Desktop on Windows/macOS cannot pass an AMD/Intel/Apple GPU into containers,
+# so on those machines use the native setup (python serve.py) to run on the GPU.
+
+services:
+  llama:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    command: ["-m", "/models/${MODEL_FILE:-qwen2.5-0.5b-instruct-q4_k_m.gguf}",
+              "--host", "0.0.0.0", "--port", "8081", "-t", "${LLAMA_THREADS:-4}",
+              "-c", "${CTX:-8192}", "--parallel", "4", "--metrics", "--no-webui"]
+    volumes: ["./models:/models:ro"]
+    ports: ["8081:8081"]
+    mem_limit: ${LLAMA_MEM_LIMIT:-3g}
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8081/health"]
+      interval: 5s
+      retries: 30
+
+  gateway:
+    build: .
+    environment:
+      UPSTREAM_URL: http://llama:8081
+      RESULTS_DIR: /app/results
+    volumes: ["./results:/app/results"]
+    ports: ["8000:8000"]
+    depends_on:
+      llama: { condition: service_healthy }
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    volumes: ["./ops/prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+    ports: ["9090:9090"]

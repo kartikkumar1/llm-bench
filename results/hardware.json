@@ -1,0 +1,81 @@
+{
+  "hardware": {
+    "os": "Windows 11",
+    "cpu": {
+      "name": "AMD Ryzen 3 5300U with Radeon Graphics",
+      "arch": "AMD64",
+      "physical_cores": 4,
+      "logical_cores": 8
+    },
+    "ram": {
+      "total_gb": 14.85,
+      "available_gb": 2.62
+    },
+    "gpus": [
+      {
+        "vendor": "amd",
+        "name": "AMD Radeon(TM) Graphics",
+        "vram_gb": 2.0,
+        "integrated": true
+      }
+    ],
+    "recommended_device": "vulkan",
+    "selected_gpu": {
+      "vendor": "amd",
+      "name": "AMD Radeon(TM) Graphics",
+      "vram_gb": 2.0,
+      "integrated": true
+    },
+    "vulkan_available": true
+  },
+  "config": {
+    "hardware": {
+      "device": "vulkan",
+      "threads": 4,
+      "gpu_layers": 99
+    },
+    "memory": {
+      "max_ram_gb": 2.1,
+      "max_vram_gb": null
+    },
+    "model": {
+      "profile": "minimal",
+      "name": "qwen2.5-0.5b",
+      "quants": [
+        "fp16",
+        "q8_0",
+        "q5_k_m",
+        "q4_k_m",
+        "q3_k_m",
+        "q2_k"
+      ],
+      "ctx_size": 2048
+    },
+    "benchmark": {
+      "backends": [
+        "llamacpp_server",
+        "llamacpp_python"
+      ],
+      "prompt_tokens": [
+        128,
+        512
+      ],
+      "max_new_tokens": 128,
+      "concurrency": [
+        1,
+        4
+      ],
+      "repeats": 3,
+      "warmup": 1
+    },
+    "gateway": {
+      "host": "0.0.0.0",
+      "port": 8000,
+      "upstream": "http://127.0.0.1:8081"
+    },
+    "_resolved": {
+      "memory_budget_gb": 2.1,
+      "skipped_quants_over_budget": []
+    }
+  }
+}

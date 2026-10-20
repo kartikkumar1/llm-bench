@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+models/
+llama.cpp/
+data/
+results/logs/
+results/*.log
+.claude/
+dashboard/node_modules/
+dashboard/dist/
+.env

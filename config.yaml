@@ -1,0 +1,39 @@
+# llm-bench configuration.
+# Every value set to "auto" is filled in by `python -m bench.hwdetect` from the
+# detected hardware. Replace any "auto" with an explicit value to override it.
+
+hardware:
+  device: auto          # auto | cpu | cuda | vulkan | metal
+  threads: auto         # auto = physical core count
+  gpu_layers: auto      # auto = 99 (all) on GPU, 0 on CPU
+
+memory:
+  # Upper bound the benchmark may use for model weights + KV cache.
+  # auto = min(40% of total RAM, 80% of currently free RAM); 80% of VRAM on a discrete GPU.
+  max_ram_gb: auto
+  max_vram_gb: auto
+
+model:
+  # minimal  -> smallest model (0.5B), lowest RAM/VRAM
+  # balanced -> 1.5B
+  # max      -> largest catalog model that fits the memory budget
+  profile: minimal
+  name: auto            # or a key from bench/catalog.py, e.g. qwen2.5-1.5b
+  quants: auto          # auto, or a list e.g. [q8_0, q4_k_m, q2_k]
+  ctx_size: 2048
+
+benchmark:
+  # llamacpp_server_cpu = same C++ server with GPU offload off (fair vs. the CPU-only Python wheel).
+  # Add hf_transformers if torch + transformers are installed.
+  backends: [llamacpp_server, llamacpp_server_cpu, llamacpp_python]
+  prompt_tokens: [128, 512]
+  max_new_tokens: 128
+  concurrency: [1, 4]
+  repeats: 3
+  warmup: 1
+
+gateway:
+  host: 0.0.0.0
+  port: 8000
+  # Backend the gateway proxies /v1/chat/completions to.
+  upstream: http://127.0.0.1:8081

@@ -1,0 +1,9 @@
+psutil>=5.9
+pyyaml>=6.0
+httpx>=0.27
+fastapi>=0.115
+uvicorn[standard]>=0.30
+prometheus-client>=0.20
+huggingface_hub>=0.25
+# Python serving path (in-process llama.cpp bindings). Install separately, see README:
+#   pip install llama-cpp-python[server] --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
