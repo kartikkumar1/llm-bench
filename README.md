@@ -17,7 +17,7 @@ with Prometheus metrics serves the model, and a **React dashboard** shows the re
 
 ## Results
 
-Measured on a budget laptop. Re-run on your machine with `python -m bench.run --perplexity`,
+Measured on my budget laptop. Re-run on your OWN machine with `python -m bench.run --perplexity`,
 then regenerate these tables with `python -m bench.report`.
 
 **Hardware:** AMD Ryzen 3 5300U (4C/8T), 14.85 GB RAM, AMD Radeon integrated GPU · device `vulkan` · llama.cpp `b11753`  
