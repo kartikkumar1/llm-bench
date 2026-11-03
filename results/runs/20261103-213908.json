@@ -1,0 +1,319 @@
+{
+  "started_at": "2026-11-03T21:39:08.544226+00:00",
+  "duration_s": 900.1,
+  "model": "qwen2.5-0.5b",
+  "llamacpp_version": "b12077 llama-b12077-bin-win-vulkan-x64.zip",
+  "hardware": {
+    "os": "Windows 10",
+    "cpu": {
+      "name": "AMD Ryzen 3 3200G with Radeon Vega Graphics",
+      "arch": "AMD64",
+      "physical_cores": 4,
+      "logical_cores": 4
+    },
+    "ram": {
+      "total_gb": 25.72,
+      "available_gb": 14.91
+    },
+    "gpus": [
+      {
+        "vendor": "amd",
+        "name": "AMD Radeon RX 7600",
+        "vram_gb": 4.0,
+        "integrated": false
+      }
+    ],
+    "recommended_device": "vulkan",
+    "selected_gpu": {
+      "vendor": "amd",
+      "name": "AMD Radeon RX 7600",
+      "vram_gb": 4.0,
+      "integrated": false
+    },
+    "vulkan_available": true
+  },
+  "config": {
+    "hardware": {
+      "device": "vulkan",
+      "threads": 4,
+      "gpu_layers": 99
+    },
+    "memory": {
+      "max_ram_gb": 10.3,
+      "max_vram_gb": 3.2
+    },
+    "model": {
+      "profile": "minimal",
+      "name": "qwen2.5-0.5b",
+      "quants": [
+        "fp16",
+        "q8_0",
+        "q5_k_m",
+        "q4_k_m",
+        "q3_k_m",
+        "q2_k"
+      ],
+      "ctx_size": 2048
+    },
+    "benchmark": {
+      "backends": [
+        "llamacpp_server",
+        "llamacpp_server_cpu",
+        "llamacpp_python"
+      ],
+      "prompt_tokens": [
+        128,
+        512
+      ],
+      "max_new_tokens": 128,
+      "concurrency": [
+        1,
+        4
+      ],
+      "repeats": 3,
+      "warmup": 1
+    },
+    "gateway": {
+      "host": "0.0.0.0",
+      "port": 8000,
+      "upstream": "http://127.0.0.1:8081"
+    },
+    "_resolved": {
+      "memory_budget_gb": 3.2,
+      "skipped_quants_over_budget": []
+    }
+  },
+  "runs": [
+    {
+      "backend": "llamacpp_python",
+      "quant": "fp16",
+      "model_file_mb": 1207.8,
+      "load_seconds": 3.9,
+      "memory": {
+        "peak_rss_mb": 2379.8,
+        "peak_gpu_mb": null
+      },
+      "rows": [
+        {
+          "prompt_tokens_target": 128,
+          "concurrency": 1,
+          "ok": 3,
+          "errors": 0,
+          "ttft_ms_p50": 2879.7,
+          "ttft_ms_p95": 2896.9,
+          "e2e_ms_p50": 14984.8,
+          "e2e_ms_p95": 16006.8,
+          "itl_ms_mean": 94.66,
+          "decode_tps_mean": 10.64,
+          "throughput_tps": 8.61,
+          "requests_per_s": 0.067,
+          "prompt_tokens": 0,
+          "completion_tokens_mean": 128
+        },
+        {
+          "prompt_tokens_target": 128,
+          "concurrency": 4,
+          "ok": 3,
+          "errors": 9,
+          "ttft_ms_p50": 11125.4,
+          "ttft_ms_p95": 11470.6,
+          "e2e_ms_p50": 22546.1,
+          "e2e_ms_p95": 22841.3,
+          "itl_ms_mean": 87.64,
+          "decode_tps_mean": 11.42,
+          "throughput_tps": 5.73,
+          "requests_per_s": 0.045,
+          "prompt_tokens": 0,
+          "completion_tokens_mean": 128
+        },
+        {
+          "prompt_tokens_target": 512,
+          "concurrency": 1,
+          "ok": 3,
+          "errors": 0,
+          "ttft_ms_p50": 10706.7,
+          "ttft_ms_p95": 10909.8,
+          "e2e_ms_p50": 21774.3,
+          "e2e_ms_p95": 22094.5,
+          "itl_ms_mean": 87.37,
+          "decode_tps_mean": 11.44,
+          "throughput_tps": 5.85,
+          "requests_per_s": 0.046,
+          "prompt_tokens": 0,
+          "completion_tokens_mean": 128
+        },
+        {
+          "prompt_tokens_target": 512,
+          "concurrency": 4,
+          "ok": 3,
+          "errors": 9,
+          "ttft_ms_p50": 42789.8,
+          "ttft_ms_p95": 46021.4,
+          "e2e_ms_p50": 53798.5,
+          "e2e_ms_p95": 57697.3,
+          "itl_ms_mean": 88.72,
+          "decode_tps_mean": 11.28,
+          "throughput_tps": 2.32,
+          "requests_per_s": 0.018,
+          "prompt_tokens": 0,
+          "completion_tokens_mean": 128
+        }
+      ],
+      "perplexity": 16.7316
+    },
+    {
+      "backend": "llamacpp_python",
+      "quant": "q8_0",
+      "model_file_mb": 644.4,
+      "load_seconds": 3.44,
+      "memory": {
+        "peak_rss_mb": 1816.5,
+        "peak_gpu_mb": null
+      },
+      "rows": [
+        {
+          "prompt_tokens_target": 128,
+          "concurrency": 1,
+          "ok": 3,
+          "errors": 0,
+          "ttft_ms_p50": 2148.1,
+          "ttft_ms_p95": 2360.5,
+          "e2e_ms_p50": 6689.5,
+          "e2e_ms_p95": 6751.0,
+          "itl_ms_mean": 35.1,
+          "decode_tps_mean": 28.49,
+          "throughput_tps": 19.15,
+          "requests_per_s": 0.15,
+          "prompt_tokens": 0,
+          "completion_tokens_mean": 128
+        },
+        {
+          "prompt_tokens_target": 128,
+          "concurrency": 4,
+          "ok": 3,
+          "errors": 9,
+          "ttft_ms_p50": 8802.2,
+          "ttft_ms_p95": 8841.0,
+          "e2e_ms_p50": 13323.3,
+          "e2e_ms_p95": 13403.5,
+          "itl_ms_mean": 35.51,
+          "decode_tps_mean": 28.15,
+          "throughput_tps": 9.61,
+          "requests_per_s": 0.075,
+          "prompt_tokens": 0,
+          "completion_tokens_mean": 128
+        },
+        {
+          "prompt_tokens_target": 512,
+          "concurrency": 1,
+          "ok": 3,
+          "errors": 0,
+          "ttft_ms_p50": 8299.0,
+          "ttft_ms_p95": 8336.8,
+          "e2e_ms_p50": 13353.7,
+          "e2e_ms_p95": 13721.5,
+          "itl_ms_mean": 40.55,
+          "decode_tps_mean": 24.69,
+          "throughput_tps": 9.55,
+          "requests_per_s": 0.075,
+          "prompt_tokens": 0,
+          "completion_tokens_mean": 128
+        },
+        {
+          "prompt_tokens_target": 512,
+          "concurrency": 4,
+          "ok": 3,
+          "errors": 9,
+          "ttft_ms_p50": 34634.4,
+          "ttft_ms_p95": 39350.9,
+          "e2e_ms_p50": 40255.5,
+          "e2e_ms_p95": 44607.9,
+          "itl_ms_mean": 41.64,
+          "decode_tps_mean": 24.03,
+          "throughput_tps": 3.08,
+          "requests_per_s": 0.024,
+          "prompt_tokens": 0,
+          "completion_tokens_mean": 128
+        }
+      ],
+      "perplexity": 16.8246
+    },
+    {
+      "backend": "llamacpp_python",
+      "quant": "q5_k_m",
+      "model_file_mb": 498.0,
+      "load_seconds": 3.33,
+      "memory": {
+        "peak_rss_mb": 1669.6,
+        "peak_gpu_mb": null
+      },
+      "rows": [
+        {
+          "prompt_tokens_target": 128,
+          "concurrency": 1,
+          "ok": 3,
+          "errors": 0,
+          "ttft_ms_p50": 2643.5,
+          "ttft_ms_p95": 2653.8,
+          "e2e_ms_p50": 7042.7,
+          "e2e_ms_p95": 7152.1,
+          "itl_ms_mean": 34.97,
+          "decode_tps_mean": 28.59,
+          "throughput_tps": 18.12,
+          "requests_per_s": 0.142,
+          "prompt_tokens": 0,
+          "completion_tokens_mean": 128
+        },
+        {
+          "prompt_tokens_target": 128,
+          "concurrency": 4,
+          "ok": 3,
+          "errors": 9,
+          "ttft_ms_p50": 10765.0,
+          "ttft_ms_p95": 11571.8,
+          "e2e_ms_p50": 15279.7,
+          "e2e_ms_p95": 16059.3,
+          "itl_ms_mean": 34.69,
+          "decode_tps_mean": 28.84,
+          "throughput_tps": 8.3,
+          "requests_per_s": 0.065,
+          "prompt_tokens": 0,
+          "completion_tokens_mean": 128
+        },
+        {
+          "prompt_tokens_target": 512,
+          "concurrency": 1,
+          "ok": 3,
+          "errors": 0,
+          "ttft_ms_p50": 9941.7,
+          "ttft_ms_p95": 10022.4,
+          "e2e_ms_p50": 14586.2,
+          "e2e_ms_p95": 14609.6,
+          "itl_ms_mean": 36.38,
+          "decode_tps_mean": 27.48,
+          "throughput_tps": 8.79,
+          "requests_per_s": 0.069,
+          "prompt_tokens": 0,
+          "completion_tokens_mean": 128
+        },
+        {
+          "prompt_tokens_target": 512,
+          "concurrency": 4,
+          "ok": 3,
+          "errors": 9,
+          "ttft_ms_p50": 39627.4,
+          "ttft_ms_p95": 39742.5,
+          "e2e_ms_p50": 44332.2,
+          "e2e_ms_p95": 44346.1,
+          "itl_ms_mean": 36.91,
+          "decode_tps_mean": 27.07,
+          "throughput_tps": 2.89,
+          "requests_per_s": 0.023,
+          "prompt_tokens": 0,
+          "completion_tokens_mean": 128
+        }
+      ],
+      "perplexity": 17.09
+    }
+  ]
+}

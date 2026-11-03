@@ -1,0 +1,116 @@
+{
+  "started_at": "2026-11-03T18:04:16.861054+00:00",
+  "duration_s": 8.2,
+  "model": "qwen2.5-0.5b",
+  "llamacpp_version": "b12077 llama-b12077-bin-win-vulkan-x64.zip",
+  "hardware": {
+    "os": "Windows 10",
+    "cpu": {
+      "name": "AMD Ryzen 3 3200G with Radeon Vega Graphics",
+      "arch": "AMD64",
+      "physical_cores": 4,
+      "logical_cores": 4
+    },
+    "ram": {
+      "total_gb": 25.72,
+      "available_gb": 14.3
+    },
+    "gpus": [
+      {
+        "vendor": "amd",
+        "name": "AMD Radeon RX 7600",
+        "vram_gb": 4.0,
+        "integrated": false
+      }
+    ],
+    "recommended_device": "vulkan",
+    "selected_gpu": {
+      "vendor": "amd",
+      "name": "AMD Radeon RX 7600",
+      "vram_gb": 4.0,
+      "integrated": false
+    },
+    "vulkan_available": true
+  },
+  "config": {
+    "hardware": {
+      "device": "vulkan",
+      "threads": 4,
+      "gpu_layers": 99
+    },
+    "memory": {
+      "max_ram_gb": 10.3,
+      "max_vram_gb": 3.2
+    },
+    "model": {
+      "profile": "minimal",
+      "name": "qwen2.5-0.5b",
+      "quants": [
+        "fp16",
+        "q8_0",
+        "q5_k_m",
+        "q4_k_m",
+        "q3_k_m",
+        "q2_k"
+      ],
+      "ctx_size": 2048
+    },
+    "benchmark": {
+      "backends": [
+        "llamacpp_server",
+        "llamacpp_server_cpu",
+        "llamacpp_python"
+      ],
+      "prompt_tokens": [
+        128,
+        512
+      ],
+      "max_new_tokens": 128,
+      "concurrency": [
+        1,
+        4
+      ],
+      "repeats": 3,
+      "warmup": 1
+    },
+    "gateway": {
+      "host": "0.0.0.0",
+      "port": 8000,
+      "upstream": "http://127.0.0.1:8081"
+    },
+    "_resolved": {
+      "memory_budget_gb": 3.2,
+      "skipped_quants_over_budget": []
+    }
+  },
+  "runs": [
+    {
+      "backend": "llamacpp_server",
+      "quant": "fp16",
+      "model_file_mb": 1207.8,
+      "load_seconds": 6.04,
+      "memory": {
+        "peak_rss_mb": 1375.0,
+        "peak_gpu_mb": 1331.4
+      },
+      "rows": [
+        {
+          "prompt_tokens_target": 128,
+          "concurrency": 1,
+          "ok": 1,
+          "errors": 0,
+          "ttft_ms_p50": 57.9,
+          "ttft_ms_p95": 57.9,
+          "e2e_ms_p50": 886.6,
+          "e2e_ms_p95": 886.6,
+          "itl_ms_mean": 6.5,
+          "decode_tps_mean": 153.25,
+          "throughput_tps": 144.31,
+          "requests_per_s": 1.127,
+          "prompt_tokens": 177,
+          "completion_tokens_mean": 128
+        }
+      ]
+    }
+  ]
+}
