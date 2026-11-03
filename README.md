@@ -92,6 +92,60 @@ neighbouring CPU quants are noisy (e.g. q5_k_m slower than q4_k_m, RSS not monot
 llama-cpp-python wheel is CPU-only, which is why `llama.cpp C++ (CPU)` exists as the like-for-like
 comparison. For publishable numbers, close other apps and raise `benchmark.repeats` to 5+.
 
+### Local run on anoher machine with better configuration (Windows 10 / AMD Ryzen 3 3200G + RX 7600)**********************************
+
+Hardware: AMD Ryzen 3 3200G with Radeon Vega Graphics (4C/4T), 25.72 GB RAM, AMD Radeon RX 7600 · device `vulkan` · run `2026-11-03 20:51 UTC`
+Model: `qwen2.5-0.5b` (Qwen2.5-0.5B-Instruct) · 128 new tokens per request · 1 repeat · `llama.cpp` `b12077`
+
+#### Quality (perplexity on wikitext-2, lower is better)
+| quant | file MB | perplexity | vs fp16 |
+|---|---:|---:|---:|
+| fp16 | 1,208 | 16.7316 | +0.0% |
+| q8_0 | 644 | 16.8246 | +0.6% |
+| q5_k_m | 498 | 17.0900 | +2.1% |
+
+#### Decode speed, tok/s (prompt 128, 1 request)
+| quant | llama.cpp C++ (GPU) | llama.cpp C++ (CPU) | llama-cpp-python (CPU) |
+|---|---:|---:|---:|
+| fp16 | 119.9 | 10.6 | not run |
+| q8_0 | 139.9 | 25.7 | not run |
+| q5_k_m | 138.1 | 29.5 | not run |
+
+#### Time to first token p50, ms (prompt 512, 1 request)
+| quant | llama.cpp C++ (GPU) | llama.cpp C++ (CPU) | llama-cpp-python (CPU) |
+|---|---:|---:|---:|
+| fp16 | 127 | 6,092 | not run |
+| q8_0 | 130 | 5,969 | not run |
+| q5_k_m | 133 | 7,390 | not run |
+
+#### Aggregate throughput, tok/s (prompt 128, 4 concurrent requests)
+| quant | llama.cpp C++ (GPU) | llama.cpp C++ (CPU) | llama-cpp-python (CPU) |
+|---|---:|---:|---:|
+| fp16 | 174.3 | 19.6 | not run |
+| q8_0 | 165.4 | 24.6 | not run |
+| q5_k_m | 191.3 | 23.9 | not run |
+
+#### Peak memory, MB (RSS; GPU memory in brackets)
+| quant | llama.cpp C++ (GPU) | llama.cpp C++ (CPU) | llama-cpp-python (CPU) |
+|---|---:|---:|---:|
+| fp16 | 1,636.6 [1,415.1] | 1,335.6 [6.1] | not run |
+| q8_0 | 1,077.9 [878.4] | 891.7 [6.1] | not run |
+| q5_k_m | 998.3 [797.1] | 755.4 [6.1] | not run |
+
+**What the numbers say on this machine:**
+
+- **The GPU path is dramatically faster than CPU-only.** At 512 tokens of prompt, TTFT sits around
+  127–133 ms on Vulkan vs ~6.0–7.4 s on CPU.
+- **Quantization is still very cheap.** `q8_0` keeps perplexity almost identical to fp16 (+0.6%) while
+  reducing model size by ~47%; `q5_k_m` stays within +2.1% while staying under 500 MB.
+- **The local machine strongly favors Vulkan.** Even with 4 concurrent requests, the GPU route stays
+  around 165–191 tok/s aggregate throughput, whereas the CPU-only server is ~20–25 tok/s.
+- **The local benchmark is intentionally short.** This was a focused smoke/full sweep run on one
+  machine, so it is useful for validating the setup and trend direction rather than publishing final
+  production-quality numbers.
+
+
+
 ## Hardware is detected automatically
 
 `python -m bench.hwdetect` reads the CPU, RAM and GPU and fills in every `auto` value in
