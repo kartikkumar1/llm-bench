@@ -94,8 +94,8 @@ comparison. For publishable numbers, close other apps and raise `benchmark.repea
 
 ### Local run on anoher machine with better configuration (Windows 10 / AMD Ryzen 3 3200G + RX 7600)**********************************
 
-Hardware: AMD Ryzen 3 3200G with Radeon Vega Graphics (4C/4T), 25.72 GB RAM, AMD Radeon RX 7600 · device `vulkan` · run `2026-11-03 20:51 UTC`
-Model: `qwen2.5-0.5b` (Qwen2.5-0.5B-Instruct) · 128 new tokens per request · 1 repeat · `llama.cpp` `b12077`
+Hardware: AMD Ryzen 3 3200G with Radeon Vega Graphics (4C/4T), 25.72 GB RAM, AMD Radeon RX 7600 · device `vulkan` · runs `2026-11-03 20:51` and `21:39 UTC`
+Model: `qwen2.5-0.5b` (Qwen2.5-0.5B-Instruct) · 128 new tokens per request · 3 repeats · `llama.cpp` `b12077`
 
 #### Quality (perplexity on wikitext-2, lower is better)
 | quant | file MB | perplexity | vs fp16 |
@@ -107,43 +107,43 @@ Model: `qwen2.5-0.5b` (Qwen2.5-0.5B-Instruct) · 128 new tokens per request · 1
 #### Decode speed, tok/s (prompt 128, 1 request)
 | quant | llama.cpp C++ (GPU) | llama.cpp C++ (CPU) | llama-cpp-python (CPU) |
 |---|---:|---:|---:|
-| fp16 | 119.9 | 10.6 | not run |
-| q8_0 | 139.9 | 25.7 | not run |
-| q5_k_m | 138.1 | 29.5 | not run |
+| fp16 | 119.9 | 10.6 | 10.6 |
+| q8_0 | 139.9 | 25.7 | 28.5 |
+| q5_k_m | 138.1 | 29.5 | 28.6 |
 
 #### Time to first token p50, ms (prompt 512, 1 request)
 | quant | llama.cpp C++ (GPU) | llama.cpp C++ (CPU) | llama-cpp-python (CPU) |
 |---|---:|---:|---:|
-| fp16 | 127 | 6,092 | not run |
-| q8_0 | 130 | 5,969 | not run |
-| q5_k_m | 133 | 7,390 | not run |
+| fp16 | 127 | 6,092 | 10,707 |
+| q8_0 | 130 | 5,969 | 8,299 |
+| q5_k_m | 133 | 7,390 | 9,942 |
 
 #### Aggregate throughput, tok/s (prompt 128, 4 concurrent requests)
 | quant | llama.cpp C++ (GPU) | llama.cpp C++ (CPU) | llama-cpp-python (CPU) |
 |---|---:|---:|---:|
-| fp16 | 174.3 | 19.6 | not run |
-| q8_0 | 165.4 | 24.6 | not run |
-| q5_k_m | 191.3 | 23.9 | not run |
+| fp16 | 174.3 | 19.6 | 5.7 |
+| q8_0 | 165.4 | 24.6 | 9.6 |
+| q5_k_m | 191.3 | 23.9 | 8.3 |
 
 #### Peak memory, MB (RSS; GPU memory in brackets)
 | quant | llama.cpp C++ (GPU) | llama.cpp C++ (CPU) | llama-cpp-python (CPU) |
 |---|---:|---:|---:|
-| fp16 | 1,636.6 [1,415.1] | 1,335.6 [6.1] | not run |
-| q8_0 | 1,077.9 [878.4] | 891.7 [6.1] | not run |
-| q5_k_m | 998.3 [797.1] | 755.4 [6.1] | not run |
+| fp16 | 1,636.6 [1,415.1] | 1,335.6 [6.1] | 2,379.8 |
+| q8_0 | 1,077.9 [878.4] | 891.7 [6.1] | 1,816.5 |
+| q5_k_m | 998.3 [797.1] | 755.4 [6.1] | 1,669.6 |
 
 **What the numbers say on this machine:**
 
 - **The GPU path is dramatically faster than CPU-only.** At 512 tokens of prompt, TTFT sits around
-  127–133 ms on Vulkan vs ~6.0–7.4 s on CPU.
+  127–133 ms on Vulkan, versus ~6.0–7.4 s on the C++ CPU server and ~8.3–10.7 s with
+  llama-cpp-python.
 - **Quantization is still very cheap.** `q8_0` keeps perplexity almost identical to fp16 (+0.6%) while
   reducing model size by ~47%; `q5_k_m` stays within +2.1% while staying under 500 MB.
-- **The local machine strongly favors Vulkan.** Even with 4 concurrent requests, the GPU route stays
-  around 165–191 tok/s aggregate throughput, whereas the CPU-only server is ~20–25 tok/s.
-- **The local benchmark is intentionally short.** This was a focused smoke/full sweep run on one
-  machine, so it is useful for validating the setup and trend direction rather than publishing final
-  production-quality numbers.
-
+- **The serving path matters on CPU.** The llama-cpp-python backend uses more memory than the C++ CPU
+  server and has lower aggregate throughput at four concurrent requests in this run.
+- **The local results are machine-specific.** Both CPU backends run on the Ryzen 3 3200G; the GPU
+  backend uses the RX 7600 with Vulkan. Treat the results as a comparison for this system, not a
+  general ranking across hardware.
 
 
 ## Hardware is detected automatically
