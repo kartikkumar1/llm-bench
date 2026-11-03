@@ -17,11 +17,67 @@ with Prometheus metrics serves the model, and a **React dashboard** shows the re
 
 ## Results
 
-Measured on my budget laptop. Re-run on your OWN machine with `python -m bench.run --perplexity`,
-then regenerate these tables with `python -m bench.report`.
+Measured on two of my own machines with the same model and settings. Re-run on your hardware
+with `python -m bench.run --perplexity`, then regenerate the tables with `python -m bench.report`.
 
-**Hardware:** AMD Ryzen 3 5300U (4C/8T), 14.85 GB RAM, AMD Radeon integrated GPU · device `vulkan` · llama.cpp `b11753`  
-**Model:** `qwen2.5-0.5b` (Qwen2.5-0.5B-Instruct) · 128 new tokens per request · 3 repeats · run `2026-10-20 10:47 UTC`
+**Model:** `qwen2.5-0.5b` (Qwen2.5-0.5B-Instruct) · 128 new tokens per request · 3 repeats
+
+| | Laptop | Desktop |
+|---|---|---|
+| CPU | AMD Ryzen 3 5300U (4C/8T) | AMD Ryzen 3 3200G (4C/4T) |
+| RAM | 14.85 GB | 25.72 GB |
+| GPU | Radeon integrated (shares system RAM) | Radeon RX 7600, 8 GB GDDR6 (discrete) |
+| OS · backend · llama.cpp | Windows 11 · Vulkan · `b11753` | Windows 10 · Vulkan · `b12077` |
+| Run | `2026-10-20 10:47 UTC` | `2026-11-03 20:51` and `21:39 UTC` |
+
+### Side by side (q8_0)
+
+| metric | Laptop GPU (iGPU) | Desktop GPU (RX 7600) | Laptop C++ CPU | Desktop C++ CPU |
+|---|---:|---:|---:|---:|
+| Decode, tok/s (1 request) | 46.9 | **139.9** | 39.4 | 25.7 |
+| Time to first token p50, ms (512-token prompt) | 1,024 | **130** | 3,562 | 5,969 |
+| Throughput, tok/s (4 concurrent requests) | 77.2 | **165.4** | 44.8 | 24.6 |
+| Perplexity vs fp16 | +0.4% | +0.6% | same as GPU | same as GPU |
+
+### What the numbers say
+
+- **Decoding is limited by memory bandwidth, and the discrete GPU proves it.** The laptop's iGPU
+  shares the CPU's memory bus, so it decodes no faster than the CPU. The RX 7600 has its own
+  GDDR6 memory and decodes q8_0 **3x faster** (140 vs 47 tok/s) and fp16 **5.5x faster**
+  (120 vs 22 tok/s).
+- **Prompt processing is compute-bound, so a real GPU wins by far more.** Time to first token on a
+  512-token prompt drops from ~6 s on the desktop CPU to **130 ms** on the RX 7600, about 46x faster.
+- **A 0.5B model is too small to saturate a discrete GPU.** On the RX 7600, fp16 is only ~15%
+  slower than q8_0 (120 vs 140 tok/s), even though its weights are twice as large. At this size,
+  fixed per-token overhead matters more than bandwidth; a 7B model would show the gap again.
+- **Quantization is nearly free down to 8 bits.** q8_0 halves the file for +0.4–0.6% perplexity
+  on both machines. On the laptop's full sweep, q4_k_m costs +3.7% and q2_k (+14%) is where
+  quality visibly drops.
+- **Batching helps on both GPUs.** llama-server batches concurrent requests: q8_0 rises from
+  47 to 77 tok/s at 4 requests on the iGPU (1.6x) and from 140 to 165 tok/s on the RX 7600 (1.2x).
+- **Python costs memory on the same engine.** llama-cpp-python wraps the same C++ kernels but uses
+  about 2x the RAM of llama-server on CPU, on both machines.
+- **The desktop CPU is slower than the laptop CPU** (fp16: 10.6 vs 22.5 tok/s). The 3200G has no
+  SMT (4 threads vs 8). Because decoding is bandwidth-bound, the RAM setup is also a likely factor:
+  single-channel or slow memory would explain the gap, and I have not ruled it out yet.
+
+**Caveats and known issues**
+
+- **llama-cpp-python under concurrency.** At 4 concurrent requests most requests to
+  `llama_cpp.server` fail rather than queue, so its throughput figures are computed from the
+  requests that succeeded. This is likely its default `interrupt_requests=True`; a fix and re-run
+  are in progress. Treat that column as unreliable until then.
+- **Noise.** 3 repeats per configuration. On the laptop only ~2–3 GB of RAM was free during the
+  run, so neighbouring CPU quants are noisy (e.g. q5_k_m slower than q4_k_m). On the desktop,
+  GPU throughput is not monotonic across quants (q5_k_m 191 > fp16 174 > q8_0 165).
+- **Different llama.cpp builds** (`b11753` vs `b12077`), so some of the gap may come from the build
+  rather than the hardware.
+- The llama-cpp-python wheel is CPU-only, which is why `llama.cpp C++ (CPU)` exists as the
+  like-for-like comparison. The `[6.1]` GPU memory on the desktop CPU backend is the Vulkan
+  context the process still opens, not model weights.
+
+<details>
+<summary><b>Full tables: laptop (Ryzen 3 5300U, integrated GPU)</b></summary>
 
 #### Quality (perplexity on wikitext-2, lower is better)
 | quant | file MB | perplexity | vs fp16 |
@@ -73,29 +129,10 @@ then regenerate these tables with `python -m bench.report`.
 | q3_k_m | 397 [635] | 907 | 1,767 |
 | q2_k | 395 [611] | 847 | 1,707 |
 
-### What the numbers say
+</details>
 
-- **Quantization is nearly free down to 8 bits.** q8_0 halves the file for +0.4% perplexity;
-  q4_k_m costs +3.7%; q2_k (+14%) is where quality visibly drops.
-- **The integrated GPU wins prompt processing, not decoding.** TTFT on a 512-token prompt is
-  ~1 s on Vulkan vs 2–5.7 s on CPU, but decode speed is similar: an iGPU shares the CPU's
-  memory bus, and decoding is memory-bandwidth bound.
-- **fp16 decodes at ~22 tok/s on every backend.** Bandwidth again: its weights are 2–3x larger.
-- **Python costs speed and memory, even on the same engine.** llama-cpp-python wraps the same
-  C++ kernels, yet decodes up to ~25% slower and uses ~2x the RAM of llama-server on CPU.
-- **Serving architecture matters more than the language under load.** llama-server batches
-  concurrent requests (q8_0 on GPU: 42 -> 77 tok/s at 4 requests); `llama_cpp.server` handles
-  one request at a time, so aggregate throughput *falls* and queued requests wait.
-
-**Caveats:** 3 repeats per configuration with only ~2–3 GB of RAM free during the run, so
-neighbouring CPU quants are noisy (e.g. q5_k_m slower than q4_k_m, RSS not monotonic). The
-llama-cpp-python wheel is CPU-only, which is why `llama.cpp C++ (CPU)` exists as the like-for-like
-comparison. For publishable numbers, close other apps and raise `benchmark.repeats` to 5+.
-
-### Local run on anoher machine with better configuration (Windows 10 / AMD Ryzen 3 3200G + RX 7600)**********************************
-
-Hardware: AMD Ryzen 3 3200G with Radeon Vega Graphics (4C/4T), 25.72 GB RAM, AMD Radeon RX 7600 · device `vulkan` · runs `2026-11-03 20:51` and `21:39 UTC`
-Model: `qwen2.5-0.5b` (Qwen2.5-0.5B-Instruct) · 128 new tokens per request · 3 repeats · `llama.cpp` `b12077`
+<details>
+<summary><b>Full tables: desktop (Ryzen 3 3200G + RX 7600)</b> (fp16, q8_0 and q5_k_m only)</summary>
 
 #### Quality (perplexity on wikitext-2, lower is better)
 | quant | file MB | perplexity | vs fp16 |
@@ -132,19 +169,7 @@ Model: `qwen2.5-0.5b` (Qwen2.5-0.5B-Instruct) · 128 new tokens per request · 3
 | q8_0 | 1,077.9 [878.4] | 891.7 [6.1] | 1,816.5 |
 | q5_k_m | 998.3 [797.1] | 755.4 [6.1] | 1,669.6 |
 
-**What the numbers say on this machine:**
-
-- **The GPU path is dramatically faster than CPU-only.** At 512 tokens of prompt, TTFT sits around
-  127–133 ms on Vulkan, versus ~6.0–7.4 s on the C++ CPU server and ~8.3–10.7 s with
-  llama-cpp-python.
-- **Quantization is still very cheap.** `q8_0` keeps perplexity almost identical to fp16 (+0.6%) while
-  reducing model size by ~47%; `q5_k_m` stays within +2.1% while staying under 500 MB.
-- **The serving path matters on CPU.** The llama-cpp-python backend uses more memory than the C++ CPU
-  server and has lower aggregate throughput at four concurrent requests in this run.
-- **The local results are machine-specific.** Both CPU backends run on the Ryzen 3 3200G; the GPU
-  backend uses the RX 7600 with Vulkan. Treat the results as a comparison for this system, not a
-  general ranking across hardware.
-
+</details>
 
 ## Hardware is detected automatically
 
